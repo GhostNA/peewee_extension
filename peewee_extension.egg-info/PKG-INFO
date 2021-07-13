@@ -1,0 +1,14 @@
+Metadata-Version: 1.1
+Name: peewee-extension
+Version: 0.1.1
+Summary: Extension peewee functionality
+Home-page: https://github.com/GhostNA/peewee_extension
+Author: Specter NA
+Author-email: naspecter@gmail.com
+License: MIT
+Description: UNKNOWN
+Keywords: peewee
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Topic :: Text Processing :: Linguistic

@@ -1,0 +1,11 @@
+README.md
+setup.cfg
+setup.py
+peewee_extension/__init__.py
+peewee_extension/models.py
+peewee_extension.egg-info/PKG-INFO
+peewee_extension.egg-info/SOURCES.txt
+peewee_extension.egg-info/dependency_links.txt
+peewee_extension.egg-info/not-zip-safe
+peewee_extension.egg-info/requires.txt
+peewee_extension.egg-info/top_level.txt
