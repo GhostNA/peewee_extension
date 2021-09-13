@@ -1,27 +1,30 @@
 import peewee
 from peewee import Model, EXCLUDED
 
+from airflow import AirflowException
+
 
 class BaseModel(Model):
     def bulk_save(self, rows: list, transaction_count=None):
         conflict_fields = self.get_model_indexes()
         update_fields = self.get_excluded_fields()
 
-        if not rows:
-            return
+        # Delete duplicates
+        rows = list({''.join([str(x.get(field)) for field in conflict_fields]): x for x in rows}.values())
 
         if not transaction_count:
             transaction_count = len(rows)
 
-        for index in range(0, len(rows), transaction_count):
-            if conflict_fields:
-                self.insert_many(rows[index:index + transaction_count]).on_conflict(
-                    action=None,
-                    conflict_target=conflict_fields,
-                    update=update_fields,
-                ).execute()
-            else:
-                self.insert_many(rows[index:index + transaction_count]).execute()
+        if transaction_count:
+            for index in range(0, len(rows), transaction_count):
+                if conflict_fields:
+                    self.insert_many(rows[index:index + transaction_count]).on_conflict(
+                        action=None,
+                        conflict_target=conflict_fields,
+                        update=update_fields,
+                    ).execute()
+                else:
+                    self.insert_many(rows[index:index + transaction_count]).execute()
 
     def save_or_update(self, row):
         conflict_fields = self.get_model_indexes()
@@ -79,9 +82,20 @@ class BaseModel(Model):
         return schema
 
     def get_model_indexes(self):
-        indexes = list(self._meta.indexes)
+        # Init vars
+        indexes = []
 
-        return indexes[0][0] if indexes else []
+        # Get model primary key if exist
+        _primary_key_field = getattr(getattr(self._meta, 'primary_key'), 'name', None)
+
+        if self._meta.indexes:
+            if self._meta.indexes[0]:
+                indexes = list(self._meta.indexes[0][0])
+
+        if not indexes:
+            indexes = [_primary_key_field]
+
+        return tuple(indexes)
 
     def get_model_fields(self):
         fields = self._meta.fields
