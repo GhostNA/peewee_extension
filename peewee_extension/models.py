@@ -1,8 +1,6 @@
 import peewee
 from peewee import Model, EXCLUDED
 
-from airflow import AirflowException
-
 
 class BaseModel(Model):
     def bulk_save(self, rows: list, transaction_count=None):
