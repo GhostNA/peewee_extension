@@ -8,7 +8,7 @@ class BaseModel(Model):
         update_fields = self.get_excluded_fields()
 
         # Delete duplicates
-        rows = list({''.join([str(x.get(field)) for field in conflict_fields]): x for x in rows}.values())
+        rows = list({''.join([str(x.get(field)) for field in conflict_fields]): self.match_schema(x) for x in rows}.values())
 
         if not transaction_count:
             transaction_count = len(rows)
