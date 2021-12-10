@@ -13,16 +13,15 @@ class BaseModel(Model):
         if not transaction_count:
             transaction_count = len(rows)
 
-        if transaction_count:
-            for index in range(0, len(rows), transaction_count):
-                if conflict_fields:
-                    self.insert_many(rows[index:index + transaction_count]).on_conflict(
-                        action=None,
-                        conflict_target=conflict_fields,
-                        update=update_fields,
-                    ).execute()
-                else:
-                    self.insert_many(rows[index:index + transaction_count]).execute()
+        for index in range(0, len(rows), transaction_count):
+            if conflict_fields and update_fields:
+                self.insert_many(rows[index:index + transaction_count]).on_conflict(
+                    action=None,
+                    conflict_target=conflict_fields,
+                    update=update_fields,
+                ).execute()
+            else:
+                self.insert_many(rows[index:index + transaction_count]).execute()
 
     def save_or_update(self, row):
         conflict_fields = self.get_model_indexes()
