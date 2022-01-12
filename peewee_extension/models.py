@@ -4,11 +4,16 @@ from peewee import Model, EXCLUDED
 
 class BaseModel(Model):
     def bulk_save(self, rows: list, transaction_count=None):
+
+        if not rows:
+            return
+
         conflict_fields = self.get_model_indexes()
         update_fields = self.get_excluded_fields()
 
         # Delete duplicates
-        rows = list({''.join([str(x.get(field)) for field in conflict_fields]): self.match_schema(x) for x in rows}.values())
+        if conflict_fields:
+            rows = list({''.join([str(x.get(field)) for field in conflict_fields]): self.match_schema(x) for x in rows}.values())
 
         if not transaction_count:
             transaction_count = len(rows)
@@ -21,7 +26,7 @@ class BaseModel(Model):
                     update=update_fields,
                 ).execute()
             else:
-                self.insert_many(rows[index:index + transaction_count]).execute()
+                self.insert_many(rows[index:index + transaction_count]).on_conflict_ignore().execute()
 
     def save_or_update(self, row):
         conflict_fields = self.get_model_indexes()
