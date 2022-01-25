@@ -15,6 +15,16 @@ class BaseModel(Model):
         if conflict_fields:
             rows = list({''.join([str(x.get(field)) for field in conflict_fields]): self.match_schema(x) for x in rows}.values())
 
+        counters = {field: 0 for field in update_fields.keys()}
+        for field in update_fields:
+            for row in rows:
+                if field in row.keys():
+                    counters[field] += 1
+
+        for key, counter in counters.items():
+            if counter == 0:
+                del update_fields[key]
+
         if not transaction_count:
             transaction_count = len(rows)
 
