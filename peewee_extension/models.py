@@ -60,6 +60,10 @@ class BaseModel(Model):
             if key in row:
                 result[key] = row[key]
 
+        for key in self.conflict_fields:
+            if not result.get(key, None):
+                del result[key]
+
         return result
 
     def get_update_data(self, row):
