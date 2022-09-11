@@ -8,12 +8,12 @@ class BaseModel(Model):
         if not rows:
             return
 
-        conflict_fields = self.get_model_indexes()
+        self.conflict_fields = self.get_model_indexes()
         update_fields = self.get_excluded_fields()
 
         # Delete duplicates
-        if conflict_fields:
-            rows = list({''.join([str(x.get(field)) for field in conflict_fields]): self.match_schema(x) for x in rows}.values())
+        if self.conflict_fields:
+            rows = list({''.join([str(x.get(field)) for field in self.conflict_fields]): self.match_schema(x) for x in rows}.values())
 
         counters = {field: 0 for field in update_fields.keys()}
         for field in update_fields:
@@ -29,24 +29,24 @@ class BaseModel(Model):
             transaction_count = len(rows)
 
         for index in range(0, len(rows), transaction_count):
-            if conflict_fields and update_fields:
+            if self.conflict_fields and update_fields:
                 self.insert_many(rows[index:index + transaction_count]).on_conflict(
                     action=None,
-                    conflict_target=conflict_fields,
+                    conflict_target=self.conflict_fields,
                     update=update_fields,
                 ).execute()
             else:
                 self.insert_many(rows[index:index + transaction_count]).on_conflict_ignore().execute()
 
     def save_or_update(self, row):
-        conflict_fields = self.get_model_indexes()
+        self.conflict_fields = self.get_model_indexes()
         row = self.match_schema(row)
         update_data = self.get_update_data(dict(row))
 
-        if conflict_fields:
+        if self.conflict_fields:
             self.insert(**row).on_conflict(
                 action=None if update_data else 'IGNORE',
-                conflict_target=conflict_fields,
+                conflict_target=self.conflict_fields,
                 update=update_data,
             ).execute()
         else:
@@ -60,7 +60,7 @@ class BaseModel(Model):
             if key in row:
                 result[key] = row[key]
 
-        for key in self.conflict_fields:
+        for key in self.self.conflict_fields:
             if not result.get(key, None):
                 del result[key]
 

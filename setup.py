@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='peewee_extension',
-      version='0.1.12',
+      version='0.1.13',
       description='Extension peewee functionality',
       classifiers=[
         'License :: OSI Approved :: MIT License',
