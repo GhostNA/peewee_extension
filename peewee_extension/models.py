@@ -60,7 +60,7 @@ class BaseModel(Model):
             if key in row:
                 result[key] = row[key]
 
-        for key in self.self.conflict_fields:
+        for key in self.conflict_fields:
             if not result.get(key, None):
                 del result[key]
 
