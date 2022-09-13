@@ -8,7 +8,6 @@ class BaseModel(Model):
         if not rows:
             return
 
-        self.conflict_fields = self.get_model_indexes()
         update_fields = self.get_excluded_fields()
 
         # Delete duplicates
@@ -39,7 +38,6 @@ class BaseModel(Model):
                 self.insert_many(rows[index:index + transaction_count]).on_conflict_ignore().execute()
 
     def save_or_update(self, row):
-        self.conflict_fields = self.get_model_indexes()
         row = self.match_schema(row)
         update_data = self.get_update_data(dict(row))
 
@@ -67,7 +65,7 @@ class BaseModel(Model):
         return result
 
     def get_update_data(self, row):
-        for val in self.get_model_indexes():
+        for val in self.conflict_fields:
             if row.get(val):
                 del row[val]
 
@@ -75,7 +73,7 @@ class BaseModel(Model):
 
     def get_excluded_fields(self):
         fields = self.get_model_fields()
-        indexes = self.get_model_indexes()
+        indexes = self.conflict_fields
         result = {}
 
         fields_set = set(fields.keys())
@@ -97,7 +95,13 @@ class BaseModel(Model):
 
         return schema
 
-    def get_model_indexes(self):
+    def get_model_fields(self):
+        fields = self._meta.fields
+
+        return fields
+
+    @property
+    def conflict_fields(self):
         # Init vars
         indexes = []
 
@@ -112,8 +116,3 @@ class BaseModel(Model):
             indexes = [_primary_key_field]
 
         return tuple(indexes)
-
-    def get_model_fields(self):
-        fields = self._meta.fields
-
-        return fields
