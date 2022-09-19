@@ -59,7 +59,7 @@ class BaseModel(Model):
                 result[key] = row[key]
 
         for key in self.conflict_fields:
-            if not result.get(key, None):
+            if result.get(key, None) is None:
                 del result[key]
 
         return result
