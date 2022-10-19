@@ -3,7 +3,7 @@ from peewee import Model, EXCLUDED
 
 
 class BaseModel(Model):
-    def bulk_save(self, rows: list, transaction_count=None):
+    def bulk_save(self, rows: list, transaction_count=10000):
 
         if not rows:
             return
